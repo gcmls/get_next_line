@@ -6,7 +6,7 @@
 /*   By: gcosta-m <gcosta-m@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/18 16:37:44 by gcosta-m          #+#    #+#             */
-/*   Updated: 2021/02/23 17:39:19 by gcosta-m         ###   ########.fr       */
+/*   Updated: 2021/03/04 18:31:55 by gcosta-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,56 +24,64 @@
 **	-1 : An error happened
 */
 
-static char	ft_lineread(char *ptr, char **line, char **str)
+static int	ft_add_line(char **str, char **line)
 {
-	char	*mem;
-
-	*line = ft_substr(*str, 0, ft_strlen(*str) - ft_strlen(ptr));
-	mem = *str;
-	*str = ft_substr(*str, ft_strlen(*line) + 1, ft_strlen(*str));
-	ft_strdel(&mem);
-	return (1);
-}
-
-static char	ft_endread(char **str, char **line)
-{
-	if (ft_strlen(*str) > 0)
+	char	*tmp;
+	size_t		i;
+	
+	i = 0;
+	while ((*str)[i] != '\0' && (*str)[i] !='\n')
+		i++;
+	if ((*str[i] == '\n'))
+	{
+		*line = ft_substr(*str, 0, i);
+		tmp = ft_strdup(&((*str)[i + 1]));
+		free(*str);
+		*str = tmp;
+		if ((*str)[0] == '\0')
+			ft_strdel(str);
+	}
+	else
 	{
 		*line = ft_strdup(*str);
 		ft_strdel(str);
-		return (1);
 	}
-	return (0);
+	return (1);
+}
+
+static int	ft_out(char **str, char **line, int out, int fd)
+{
+	if (out < 0)
+		return (-1);
+	else if (out == 0 && str[fd] == NULL)
+		return (0);
+	else
+		return (ft_add_line(&str[fd], line));	
 }
 
 int			get_next_line(const int fd, char **line)
 {
-	static char	*str = NULL;
+	static char	*str[10000];
 	char		buff[BUFF_SIZE + 1];
-	char		*mem;
-	char		*ptr;
+	char		*tmp;
 	int			out;
 
-	mem = NULL;
-	if (fd < 0 || !line || BUFF_SIZE <= 0)
+	if (fd < 0 || !line || fd == 1 || fd == 2 || BUFF_SIZE <= 0)
 		return (-1);
-	ptr = ft_strchr(str, '\n');
-	if (ptr)
-		return (ft_lineread(ptr, line, &str));
-	while ((out = read(fd, buff, BUFF_SIZE)) != -1)
+	while ((out = read(fd, buff, BUFF_SIZE)) > 0)
 	{
 		buff[out] = '\0';
-		if (!out)
+		if (str[fd] == NULL)
+			str[fd] = ft_strdup(buff);
+		else
+		{
+			tmp = ft_strjoin(str[fd], buff);
+			free(str[fd]);
+			str[fd] = tmp;			
+		}
+		if (ft_strchr(str[fd], '\n'))
 			break ;
-		mem = str;
-		str = ft_strjoin(str, buff);
-		ft_strdel(&mem);
-		ptr = ft_strchr(buff, '\n');
-		if (ptr)
-			return (ft_lineread(ptr, line, &str));
 	}
-	if (out == -1)
-		return (-1);
-	return (ft_endread(&str, line));
+	return (ft_out(str, line, out, fd));
 }
 
