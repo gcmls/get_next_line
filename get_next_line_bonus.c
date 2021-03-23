@@ -6,68 +6,63 @@
 /*   By: gcosta-m <gcosta-m@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/18 16:37:44 by gcosta-m          #+#    #+#             */
-/*   Updated: 2021/03/16 17:24:42 by gcosta-m         ###   ########.fr       */
+/*   Updated: 2021/03/23 15:41:17 by gcosta-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
 
-int64_t		ft_set(int64_t *a, int64_t b)
-{
-	*a = b;
-	return (b);
-}
-
-static char	*ft_remove_line(char **str, t_util util)
-{
-
-	if (*str == NULL)
-		return (ft_substr("", 0, 0));
-	if (ft_strchr(*str, '\n'))
-		util.out = ft_strchr(*str, '\n') - *str;
-	else
-		util.out = (size_t) - 1;
-	util.ret = ft_substr(*str, 0, util.out);
-	if (util.out != (size_t) - 1)
-		util.tmp2 = ft_substr(*str, util.out + 1, (size_t) - 1);
-	else
-		util.tmp2 = ft_substr("", 0, 0);
-	free(*str);
-	*str = util.tmp2;
-	return (util.ret);
-}
-
 static int	get_line(char **str, char **line, int fd, t_util util)
 {
-	util.aux = 1;
-	while (ft_strchr(str[fd], '\n') == NULL && util.aux)
+	char	*tmp;
+
+	util.aux = 0;
+	while (str[fd][util.aux] && str[fd][util.aux] != '\n')
+		util.aux++;
+	*line = ft_substr(str[fd], 0, util.aux);
+	if (!str[fd][util.aux])
 	{
-		util.buffer = malloc(BUFF_SIZE + 1);
-		if (ft_set(&util.aux, read(fd, util.buffer, BUFF_SIZE)) > 0)
-		{
-			util.buffer[util.aux] = '\0';
-			util.tmp = ft_strjoin(str[fd], util.buffer);
-			free(str[fd]);
-			str[fd] = util.tmp;
-		}
-		else if (util.aux == -1)
-		{
-			free(util.buffer);
-			*line = NULL;
-			return (-1);
-		}
-		free(util.buffer);
+		tmp = str[fd];
+		str[fd] = NULL;
+		free(tmp);
+		return (EOF_R);
 	}
-	*line = ft_remove_line(&(str[fd]), util);
-	return ((str[fd] && ft_strlen(str[fd]) != 0) || util.aux);
+	else
+	{
+		tmp = str[fd];
+		str[fd] = ft_strdup((str[fd]) + util.aux + 1);
+		free(tmp);
+	}
+	if (!*line || !str[fd])
+		return (ERROR);
+	if (util.out || (util.out == 0 && str[fd] != NULL))
+		return (LINE);
+	return (ERROR);
+	
 }
 
 int			get_next_line(const int fd, char **line)
 {
 	static char	*str[MAX_FD];
 	t_util		util;
+	char		*tmp;
 
-	if (fd < 0 || !line || fd == 1 || fd == 2 || fd >= MAX_FD)
-		return (-1);
+	util.buffer = NULL;
+	if (fd < 0 || !line || fd == 1 || fd == 2 || fd >= MAX_FD || !(util.buffer = malloc(BUFF_SIZE + 1)))
+		return (ERROR);
+	if (!str[fd])
+		if (!(str[fd] = ft_strdup("")))
+			return (ERROR);
+	while (( util.out = read(fd, util.buffer, BUFF_SIZE)))
+	{
+		tmp = str[fd];
+		util.buffer[util.out] = '\0';
+		if (!(str[fd] = ft_strjoin(str[fd], util.buffer)))
+			return (-1);
+		free(tmp);
+		if (ft_strchr(str[fd], '\n') != NULL)
+			break ;
+	}
+	free(util.buffer);
 	return (get_line(str, line, fd, util));
 }
