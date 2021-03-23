@@ -6,7 +6,7 @@
 /*   By: gcosta-m <gcosta-m@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/18 16:37:48 by gcosta-m          #+#    #+#             */
-/*   Updated: 2021/03/23 15:40:54 by gcosta-m         ###   ########.fr       */
+/*   Updated: 2021/03/23 16:12:53 by gcosta-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@
 typedef	struct		s_util
 {
 	char	*buffer;
-	int64_t	out;
-	int64_t	aux;
+	int	out;
+	int	aux;
 }					t_util;
 
 
