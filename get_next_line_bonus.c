@@ -6,11 +6,23 @@
 /*   By: gcosta-m <gcosta-m@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/18 16:37:44 by gcosta-m          #+#    #+#             */
-/*   Updated: 2021/03/23 15:41:17 by gcosta-m         ###   ########.fr       */
+/*   Updated: 2021/03/27 15:45:41 by gcosta-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line_bonus.h"
+
+/*
+**Description: Write a function which returns
+**a line read from a file descriptor, without the newline.
+**Parameters:
+**	1. file descriptor for reading
+**	2. The value of what has been read
+**Return value:
+**	1 : A line has been read
+**	0 : EOF has been reached
+**	-1 : An error happened
+*/
 
 static int	get_line(char **str, char **line, int fd, t_util util)
 {
@@ -48,7 +60,7 @@ int			get_next_line(const int fd, char **line)
 	char		*tmp;
 
 	util.buffer = NULL;
-	if (fd < 0 || !line || fd == 1 || fd == 2 || fd >= MAX_FD || !(util.buffer = malloc(BUFF_SIZE + 1)))
+	if (fd < 0 || !line || fd == 1 || fd == 2 || fd >= MAX_FD || BUFF_SIZE <= 0 || read(fd, util.buffer, 0) == -1 || !(util.buffer = malloc(BUFF_SIZE + 1)))
 		return (ERROR);
 	if (!str[fd])
 		if (!(str[fd] = ft_strdup("")))

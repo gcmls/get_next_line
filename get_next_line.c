@@ -6,7 +6,7 @@
 /*   By: gcosta-m <gcosta-m@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/18 16:37:44 by gcosta-m          #+#    #+#             */
-/*   Updated: 2021/03/23 16:13:32 by gcosta-m         ###   ########.fr       */
+/*   Updated: 2021/03/27 15:36:10 by gcosta-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int			get_next_line(const int fd, char **line)
 	char		*tmp;
 
 	util.buffer = NULL;
-	if (fd < 0 || !line || fd == 1 || fd == 2 || fd >= MAX_FD || !(util.buffer = malloc(BUFF_SIZE + 1)))
+	if (fd < 0 || !line || fd == 1 || fd == 2 || fd >= MAX_FD || BUFF_SIZE <= 0 || read(fd, util.buffer, 0) == -1 || !(util.buffer = malloc(BUFF_SIZE + 1)))
 		return (ERROR);
 	if (!str[fd])
 		if (!(str[fd] = ft_strdup("")))
